@@ -240,41 +240,50 @@
             <div class="privacy-section">
                 <h3>1️⃣ معمارية تبادل الهيكل فقط (Metadata-Only)</h3>
                 <p>من المستحيل أن يرى الذكاء الاصطناعي أرقام حسابتك أو أسماء موظفيك. نحن نقوم بتجريد الملف من محتواه، ونرسل للذكاء الاصطناعي <strong>"أسماء الأعمدة وأنواعها"</strong> فقط ليفهم شكل الجدول ويكتب لنا الكود المطلوب.</p>
-                <div class="code-proof">
-                    <div class="code-header"><span>دليل من كود الخادم (<code>ai_engine.py</code>)</span></div>
-                    <pre><code># نأخذ أسماء الأعمدة فقط ولا نأخذ الـ DataFrame بالكامل أبداً
+                <details class="tech-details">
+                    <summary class="tech-summary">👀 عرض الإثبات التقني (للمهندسين)</summary>
+                    <div class="code-proof">
+                        <div class="code-header"><span>دليل من كود الخادم (<code>ai_engine.py</code>)</span></div>
+                        <pre><code># نأخذ أسماء الأعمدة فقط ولا نأخذ الـ DataFrame بالكامل أبداً
 columns = list(df.columns)
 dtypes = {col: str(df[col].dtype) for col in df.columns}
 
 prompt = f"لدينا جدول أسمائه {{columns}}... اكتب كود ينفذ المطلوب"</code></pre>
-                </div>
+                    </div>
+                </details>
             </div>
 
             <!-- Concept 2 -->
             <div class="privacy-section">
                 <h3>2️⃣ التنفيذ المحلي المعزول (In-Memory Execution)</h3>
                 <p>بعد أن يُرسل لنا الذكاء الاصطناعي الأكواد البرمجية (دون رؤية البيانات)، نقوم نحن بتشغيل هذا الكود على سطور بياناتك بأمان تام داخل الذاكرة العشوائية الخاصة بالخادم الخاص بنا، ولا تخرج البيانات للخارج أبداً.</p>
-                <div class="code-proof">
-                    <div class="code-header"><span>دليل من كود الخادم (<code>cleaner.py</code>)</span></div>
-                    <pre><code># إنشاء بيئة معزولة تحتوي على نسخة من البيانات لضمان عدم المساس بالأصل
+                <details class="tech-details">
+                    <summary class="tech-summary">👀 عرض الإثبات التقني (للمهندسين)</summary>
+                    <div class="code-proof">
+                        <div class="code-header"><span>دليل من كود الخادم (<code>cleaner.py</code>)</span></div>
+                        <pre><code># إنشاء بيئة معزولة تحتوي على نسخة من البيانات لضمان عدم المساس بالأصل
 local_env = {"df": df.copy(), "pd": pd, "np": np}
 
 # تنفيذ الكود محلياً في الرام! (الذكاء يخطط ونحن من ننفذ محلياً)
 exec(code, {}, local_env)</code></pre>
-                </div>
+                    </div>
+                </details>
             </div>
 
             <!-- Concept 3 -->
             <div class="privacy-section">
                 <h3>3️⃣ جلسة عديمة الحفظ تتلاشى فوراً (Stateless Sessions)</h3>
                 <p>تطبيقنا لا يمتلك أي قاعدة بيانات (Database). يتم الاحتفاظ ببياناتك ومفتاح الـ API داخل الـ RAM المؤقتة فقط. وبمجرد قفل المتصفح أو عمل زر التحديث، تتبخر الذاكرة إلى الأبد وكأنك لم تكن هنا أبداً.</p>
-                <div class="code-proof">
-                    <div class="code-header"><span>دليل من كود الخادم (<code>main.py</code>)</span></div>
-                    <pre><code># قاموس بايثون يعيش في الـ RAM فقط، ولا يتم تسجيله على القرص الصلب نهائياً
+                <details class="tech-details">
+                    <summary class="tech-summary">👀 عرض الإثبات التقني (للمهندسين)</summary>
+                    <div class="code-proof">
+                        <div class="code-header"><span>دليل من كود الخادم (<code>main.py</code>)</span></div>
+                        <pre><code># قاموس بايثون يعيش في الـ RAM فقط، ولا يتم تسجيله على القرص الصلب نهائياً
 sessions = {}
 
 # يتم تبخير القاموس دورياً أو بمجرد إغلاق جلستك تلقائياً</code></pre>
-                </div>
+                    </div>
+                </details>
             </div>
         </div>
     </div>
