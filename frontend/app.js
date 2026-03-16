@@ -164,47 +164,6 @@ function renderScanReport(report) {
         ? "var(--warning)" : "var(--danger)";
     healthBadge.style.borderColor = healthBadge.style.color;
 
-    // Draw Chart.js Doughnut — safe re-render guard
-    try {
-        if (healthChartInstance) {
-            healthChartInstance.destroy();
-            healthChartInstance = null;
-        }
-        const canvas = document.getElementById('healthChart');
-        // Reset canvas to clear any stale state from a previous chart
-        const parent = canvas.parentElement;
-        const newCanvas = document.createElement('canvas');
-        newCanvas.id = 'healthChart';
-        parent.replaceChild(newCanvas, canvas);
-
-        const ctx = newCanvas.getContext('2d');
-        healthChartInstance = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['صحي', 'مشاكل محتملة'],
-                datasets: [{
-                    data: [score, 100 - score],
-                    backgroundColor: [
-                        score > 70 ? '#00e676' : (score > 40 ? '#ffb74d' : '#ff5252'),
-                        'rgba(255, 255, 255, 0.05)'
-                    ],
-                    borderWidth: 0,
-                    cutout: '75%'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: true }
-                }
-            }
-        });
-    } catch (chartErr) {
-        console.warn('Chart render skipped:', chartErr);
-    }
-
     // Summary stats
     const summaryEl = document.getElementById("scanSummary");
     summaryEl.innerHTML = `

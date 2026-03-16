@@ -137,8 +137,9 @@ def get_cleaning_code(df: pd.DataFrame, user_request: str, api_key: str = None) 
         except Exception as e:
             error_msg = str(e)
             last_error = error_msg
-            # If quota error, skip to next model immediately
+            # If quota error, wait a bit and skip to next model
             if "429" in error_msg:
+                time.sleep(2)
                 continue
             # If model not found, skip silently
             if "404" in error_msg or "NOT_FOUND" in error_msg:
