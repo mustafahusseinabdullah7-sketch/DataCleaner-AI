@@ -3,7 +3,7 @@
    Handles: Upload, Scan, Chat/Clean, Preview, Export
    ============================================================ */
 
-const API = "http://127.0.0.1:8000";
+const API = "https://mustafahussein2000-datacleaner-api.hf.space";
 let sessionId = null;
 let currentFileName = null;
 let auditLog = [];
