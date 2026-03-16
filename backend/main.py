@@ -1,6 +1,8 @@
 import os
+import sys
 import uuid
 import json
+import traceback
 import pandas as pd
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,10 +11,17 @@ from fastapi.responses import FileResponse, JSONResponse
 from dotenv import load_dotenv
 import shutil
 
-from scanner import scan_dataframe
-from ai_engine import get_cleaning_code
-from cleaner import execute_cleaning_code
-from exporter import export_csv, export_excel, export_python_code, export_pdf_report, export_jupyter_notebook
+# Fix imports for both local and Hugging Face environments
+try:
+    from backend.scanner import scan_dataframe
+    from backend.ai_engine import get_cleaning_code
+    from backend.cleaner import execute_cleaning_code
+    from backend.exporter import export_csv, export_excel, export_python_code, export_pdf_report, export_jupyter_notebook
+except ImportError:
+    from scanner import scan_dataframe
+    from ai_engine import get_cleaning_code
+    from cleaner import execute_cleaning_code
+    from exporter import export_csv, export_excel, export_python_code, export_pdf_report, export_jupyter_notebook
 
 load_dotenv()
 
@@ -101,19 +110,26 @@ async def clean_data(
     user_request: str = Form(...)
 ):
     """Process a natural language cleaning request."""
-    if session_id not in sessions:
-        raise HTTPException(status_code=404, detail="Session not found. Please upload a file first.")
+    try:
+        if session_id not in sessions:
+            raise HTTPException(status_code=404, detail="Session not found. Please upload a file first.")
 
-    session = sessions[session_id]
-    df = session["df_current"]
+        session = sessions[session_id]
+        df = session["df_current"]
 
-    # Get cleaning code from Gemini (sends only metadata, NOT real data)
-    ai_result = get_cleaning_code(df, user_request)
+        # Get cleaning code from Gemini (sends only metadata, NOT real data)
+        ai_result = get_cleaning_code(df, user_request)
 
-    if not ai_result["success"]:
-        raise HTTPException(status_code=500, detail=f"AI Error: {ai_result.get('error', 'Unknown error')}")
+        if not ai_result["success"]:
+            raise HTTPException(status_code=500, detail=f"AI Error: {ai_result.get('error', 'Unknown error')}")
 
-    code = ai_result["code"]
+        code = ai_result["code"]
+    except HTTPException:
+        raise
+    except Exception as e:
+        err = traceback.format_exc()
+        print(f"[CLEAN ERROR] {err}")
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
     # Save state to history before executing
     session["history"].append({
