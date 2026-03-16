@@ -61,9 +61,12 @@ def test_api_key(api_key: str) -> dict:
         current_client = genai.Client(api_key=api_key)
         # Try a very cheap request to verify quota
         models_to_try = [
-            "models/gemini-2.0-flash-lite",
             "models/gemini-2.0-flash",
-            "models/gemini-1.5-flash",
+            "models/gemini-2.0-flash-lite",
+            "models/gemini-2.5-flash",
+            "models/gemini-flash-latest",
+            "gemini-2.0-flash",
+            "gemini-1.5-flash",
         ]
         
         last_error = ""
@@ -134,9 +137,8 @@ def get_cleaning_code(df: pd.DataFrame, user_request: str, api_key: str = None) 
         except Exception as e:
             error_msg = str(e)
             last_error = error_msg
-            # If quota error, wait a bit and skip to next model
+            # If quota error, skip to next model immediately
             if "429" in error_msg:
-                time.sleep(2)
                 continue
             # If model not found, skip silently
             if "404" in error_msg or "NOT_FOUND" in error_msg:
