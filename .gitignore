@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+
+# Sensitive Data
+.env
+
+# Project specific
+uploads/
+outputs/
+
+# OS specific
+.DS_Store
+Thumbs.db

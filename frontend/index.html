@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataCleaner AI — مساعدك الذكي لتنظيف البيانات</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=2">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<!-- ========== HEADER ========== -->
+<header class="header">
+    <div class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">DataCleaner <span class="logo-ai">AI</span></span>
+    </div>
+    <div class="header-badge">
+        <span class="badge-dot"></span>
+        <span>Zero-Data Exposure</span>
+    </div>
+</header>
+
+<!-- ========== MAIN ========== -->
+<main class="main-container">
+
+    <!-- STEP 1: UPLOAD -->
+    <section id="section-upload" class="section active">
+        <div class="hero-text">
+            <h1>نظّف بياناتك بجملة واحدة 🧠</h1>
+            <p>ارفع ملفك، واطلب ما تريد بلغتك الطبيعية — الذكاء الاصطناعي يكتب الكود ويُنفذه فوراً</p>
+        </div>
+
+        <div class="upload-zone" id="uploadZone">
+            <div class="upload-icon">📂</div>
+            <p class="upload-title">اسحب وأفلت ملفك هنا</p>
+            <p class="upload-subtitle">أو</p>
+            <label class="btn-primary" for="fileInput">اختر ملف CSV / Excel</label>
+            <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" hidden>
+            <p class="upload-note">🔒 بياناتك لن تغادر جهازك — معالجة محلية 100%</p>
+        </div>
+
+        <div class="upload-progress hidden" id="uploadProgress">
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <p id="progressText">جاري الرفع...</p>
+        </div>
+    </section>
+
+    <!-- STEP 2: SCAN REPORT + CHAT + PREVIEW -->
+    <section id="section-workspace" class="section hidden">
+
+        <div class="workspace-grid">
+
+            <!-- LEFT: Scan Report + Chat -->
+            <div class="workspace-left">
+
+                <!-- Scan Report -->
+                <div class="card" id="scanCard">
+                    <div class="card-header">
+                        <span class="card-icon">🔍</span>
+                        <h2>تقرير الفحص الذكي</h2>
+                        <div class="health-badge" id="healthBadge">--</div>
+                    </div>
+                    <div id="scanSummary" class="scan-summary"></div>
+                    <div class="chart-container" style="width: 120px; height: 120px; margin: 0 auto 16px;">
+                        <canvas id="healthChart"></canvas>
+                    </div>
+                    <div id="issuesList" class="issues-list"></div>
+                </div>
+
+                <!-- Chat Interface -->
+                <div class="card chat-card">
+                    <div class="card-header">
+                        <span class="card-icon">💬</span>
+                        <h2>مربع الأوامر</h2>
+                        <span class="chat-hint">اكتب بالعربية أو الإنجليزية</span>
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="chat-bubble assistant">
+                            <div class="bubble-avatar">🤖</div>
+                            <div class="bubble-text">أهلاً! أنا جاهز لتنظيف بياناتك. أخبرني بما تريد تغييره.</div>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <div class="quick-actions">
+                            <button class="quick-btn" onclick="setInput('احذف الصفوف المكررة')">احذف المكرر</button>
+                            <button class="quick-btn" onclick="setInput('املأ القيم المفقودة بالمتوسط')">ملء الفراغات</button>
+                            <button class="quick-btn" onclick="setInput('وحّد تنسيق التاريخ إلى YYYY-MM-DD')">توحيد التاريخ</button>
+                            <button class="quick-btn" onclick="setInput('حذف الأعمدة الفارغة كلياً')">حذف الفارغ</button>
+                        </div>
+                        <div class="chat-input-row">
+                            <button class="btn-send" id="undoBtn" style="display: none; background: rgba(255,183,77,0.1); color: var(--warning); border-color: rgba(255,183,77,0.3); margin-left: 10px;" onclick="undoAction()" title="تراجع عن الخطوة الأخيرة">
+                                <span>↺</span>
+                            </button>
+                            <input
+                                type="text"
+                                id="chatInput"
+                                placeholder="مثال: احذف أي صف لا يحتوي على رقم هاتف..."
+                                onkeydown="if(event.key==='Enter') sendMessage()"
+                            >
+                            <button class="btn-send" id="sendBtn" onclick="sendMessage()">
+                                <span>▶</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audit Log -->
+                <div class="card hidden" id="auditCard">
+                    <div class="card-header">
+                        <span class="card-icon">📝</span>
+                        <h2>سجل التدقيق</h2>
+                    </div>
+                    <div id="auditList" class="audit-list"></div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Data Preview -->
+            <div class="workspace-right">
+                <div class="card preview-card">
+                    <div class="card-header">
+                        <span class="card-icon">👁️</span>
+                        <h2>معاينة البيانات</h2>
+                        <div class="preview-tabs">
+                            <button class="tab-btn active" id="tabBefore" onclick="showTab('before')">قبل</button>
+                            <button class="tab-btn" id="tabAfter" onclick="showTab('after')">بعد</button>
+                        </div>
+                    </div>
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <span class="stat-value" id="statRows">--</span>
+                            <span class="stat-label">صف</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="statCols">--</span>
+                            <span class="stat-label">عمود</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="statIssues">--</span>
+                            <span class="stat-label">مشكلة</span>
+                        </div>
+                    </div>
+                    <div class="table-wrapper" id="tableWrapper">
+                        <p class="table-placeholder">سيظهر هنا جدول البيانات...</p>
+                    </div>
+                </div>
+
+                <!-- Export Panel -->
+                <div class="card export-card hidden" id="exportCard">
+                    <div class="card-header">
+                        <span class="card-icon">📤</span>
+                        <h2>تصدير النتائج</h2>
+                    </div>
+                    <div class="export-grid">
+                        <button class="export-btn" onclick="exportData('csv')">
+                            <span class="export-icon">📄</span>
+                            <span class="export-label">CSV</span>
+                            <span class="export-desc">ملف منظف</span>
+                        </button>
+                        <button class="export-btn" onclick="exportData('excel')">
+                            <span class="export-icon">📊</span>
+                            <span class="export-label">Excel</span>
+                            <span class="export-desc">ملف منظف</span>
+                        </button>
+                        <button class="export-btn" onclick="exportData('python')">
+                            <span class="export-icon">🐍</span>
+                            <span class="export-label">Python</span>
+                            <span class="export-desc">كود جاهز</span>
+                        </button>
+                        <button class="export-btn" onclick="exportData('pdf')">
+                            <span class="export-icon">📑</span>
+                            <span class="export-label">PDF</span>
+                            <span class="export-desc">تقرير التنظيف</span>
+                        </button>
+                        <button class="export-btn" onclick="exportData('ipynb')">
+                            <span class="export-icon">📓</span>
+                            <span class="export-label">Jupyter</span>
+                            <span class="export-desc">دفتر تفاعلي</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay hidden" id="loadingOverlay">
+    <div class="loading-card">
+        <div class="spinner"></div>
+        <p id="loadingText">جاري المعالجة...</p>
+    </div>
+</div>
+
+<!-- Toast Notifications -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="app.js?v=4"></script>
+</body>
+</html>
