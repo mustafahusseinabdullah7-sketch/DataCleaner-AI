@@ -17,9 +17,9 @@
         <span class="logo-icon">⚡</span>
         <span class="logo-text">DataCleaner <span class="logo-ai">AI</span></span>
     </div>
-    <div class="header-badge">
+    <div class="header-badge" style="cursor: pointer; transition: 0.3s;" onclick="openPrivacyModal()" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
         <span class="badge-dot"></span>
-        <span>Zero-Data Exposure</span>
+        <span>كيف نحمي بياناتك؟ 🛡️</span>
     </div>
 </header>
 
@@ -45,6 +45,8 @@
             
             <button id="btnVerifyKey" class="btn-primary" style="margin-top: 20px; width: 100%;" onclick="verifyApiKey()">بدء تنظيف البيانات 🚀</button>
 
+            <button class="btn-secondary" style="margin-top: 10px; width: 100%; border: 1px solid var(--accent); color: var(--text-light); background: transparent;" onclick="openPrivacyModal()">🛡️ هل بيانات شركتي في أمان؟</button>
+
             <div class="help-box">
                 <p>ليس لديك مفتاح؟</p>
                 <a href="https://aistudio.google.com/apikey" target="_blank" class="api-help-link">احصل على مفتاحك المجاني من جوجل من هنا</a>
@@ -67,7 +69,7 @@
             <label class="btn-primary" for="fileInput">اختر ملف CSV / Excel</label>
             <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" hidden>
             
-            <p class="upload-note">🔒 بياناتك ومفتاحك لا يتم حفظها — معالجة سحابية آمنة في الذاكرة</p>
+            <p class="upload-note">🔒 بياناتك ومفتاحك لا يتم حفظها — <a href="#" onclick="openPrivacyModal(); return false;" style="color: var(--accent); text-decoration: underline;">اكتشف كيف نحمي بياناتك (انعدام التسريب)</a></p>
         </div>
 
         <div class="upload-progress hidden" id="uploadProgress">
@@ -222,6 +224,61 @@
 
 <!-- Toast Notifications -->
 <div class="toast-container" id="toastContainer"></div>
+
+<!-- ========== DATA PRIVACY MODAL ========== -->
+<div id="privacyModal" class="modal-overlay hidden">
+    <div class="modal-content privacy-modal">
+        <button class="modal-close" onclick="closePrivacyModal()">×</button>
+        <div class="modal-header privacy-header">
+            <span class="modal-icon">🛡️</span>
+            <h2>أمان المؤسسات: انعدام تسريب البيانات</h2>
+            <p class="modal-subtitle">كيف نبني جداراً عازلاً بين بياناتك الحساسة وبين الذكاء الاصطناعي (Zero Data Leakage)</p>
+        </div>
+        
+        <div class="modal-body privacy-body">
+            <!-- Concept 1 -->
+            <div class="privacy-section">
+                <h3>1️⃣ معمارية تبادل الهيكل فقط (Metadata-Only)</h3>
+                <p>من المستحيل أن يرى الذكاء الاصطناعي أرقام حسابتك أو أسماء موظفيك. نحن نقوم بتجريد الملف من محتواه، ونرسل للذكاء الاصطناعي <strong>"أسماء الأعمدة وأنواعها"</strong> فقط ليفهم شكل الجدول ويكتب لنا الكود المطلوب.</p>
+                <div class="code-proof">
+                    <div class="code-header"><span>دليل من كود الخادم (<code>ai_engine.py</code>)</span></div>
+                    <pre><code># نأخذ أسماء الأعمدة فقط ولا نأخذ الـ DataFrame بالكامل أبداً
+columns = list(df.columns)
+dtypes = {col: str(df[col].dtype) for col in df.columns}
+
+prompt = f"لدينا جدول أسمائه {{columns}}... اكتب كود ينفذ المطلوب"</code></pre>
+                </div>
+            </div>
+
+            <!-- Concept 2 -->
+            <div class="privacy-section">
+                <h3>2️⃣ التنفيذ المحلي المعزول (In-Memory Execution)</h3>
+                <p>بعد أن يُرسل لنا الذكاء الاصطناعي الأكواد البرمجية (دون رؤية البيانات)، نقوم نحن بتشغيل هذا الكود على سطور بياناتك بأمان تام داخل الذاكرة العشوائية الخاصة بالخادم الخاص بنا، ولا تخرج البيانات للخارج أبداً.</p>
+                <div class="code-proof">
+                    <div class="code-header"><span>دليل من كود الخادم (<code>cleaner.py</code>)</span></div>
+                    <pre><code># إنشاء بيئة معزولة تحتوي على نسخة من البيانات لضمان عدم المساس بالأصل
+local_env = {"df": df.copy(), "pd": pd, "np": np}
+
+# تنفيذ الكود محلياً في الرام! (الذكاء يخطط ونحن من ننفذ محلياً)
+exec(code, {}, local_env)</code></pre>
+                </div>
+            </div>
+
+            <!-- Concept 3 -->
+            <div class="privacy-section">
+                <h3>3️⃣ جلسة عديمة الحفظ تتلاشى فوراً (Stateless Sessions)</h3>
+                <p>تطبيقنا لا يمتلك أي قاعدة بيانات (Database). يتم الاحتفاظ ببياناتك ومفتاح الـ API داخل الـ RAM المؤقتة فقط. وبمجرد قفل المتصفح أو عمل زر التحديث، تتبخر الذاكرة إلى الأبد وكأنك لم تكن هنا أبداً.</p>
+                <div class="code-proof">
+                    <div class="code-header"><span>دليل من كود الخادم (<code>main.py</code>)</span></div>
+                    <pre><code># قاموس بايثون يعيش في الـ RAM فقط، ولا يتم تسجيله على القرص الصلب نهائياً
+sessions = {}
+
+# يتم تبخير القاموس دورياً أو بمجرد إغلاق جلستك تلقائياً</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script src="app.js?v=4"></script>
 </body>

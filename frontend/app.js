@@ -528,3 +528,28 @@ function showToast(message, type = "info") {
         setTimeout(() => toast.remove(), 300);
     }, 3500);
 }
+
+// ============================================================
+// DATA PRIVACY MODAL
+// ============================================================
+function openPrivacyModal() {
+    const modal = document.getElementById('privacyModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
+}
+
+function closePrivacyModal() {
+    const modal = document.getElementById('privacyModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+// Close modal when clicking outside of it
+window.addEventListener('click', (e) => {
+    const modal = document.getElementById('privacyModal');
+    if (e.target === modal) {
+        closePrivacyModal();
+    }
+});
