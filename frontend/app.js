@@ -552,4 +552,26 @@ window.addEventListener('click', (e) => {
     if (e.target === modal) {
         closePrivacyModal();
     }
+    
+    const featuresModal = document.getElementById('featuresModal');
+    if (e.target === featuresModal) {
+        closeFeaturesModal();
+    }
 });
+
+// ============================================================
+// CORE FEATURES MODAL
+// ============================================================
+function openFeaturesModal() {
+    const modal = document.getElementById('featuresModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
+}
+
+function closeFeaturesModal() {
+    const modal = document.getElementById('featuresModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}

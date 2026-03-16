@@ -17,9 +17,15 @@
         <span class="logo-icon">⚡</span>
         <span class="logo-text">DataCleaner <span class="logo-ai">AI</span></span>
     </div>
-    <div class="header-badge" style="cursor: pointer; transition: 0.3s;" onclick="openPrivacyModal()" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-        <span class="badge-dot"></span>
-        <span>كيف نحمي بياناتك؟ 🛡️</span>
+    <div class="header-badges">
+        <div class="header-badge" style="cursor: pointer; transition: 0.3s;" onclick="openFeaturesModal()" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            <span class="badge-dot" style="background: var(--accent-2); box-shadow: 0 0 8px var(--accent-2);"></span>
+            <span>المميزات الجوهرية 🚀</span>
+        </div>
+        <div class="header-badge" style="cursor: pointer; transition: 0.3s;" onclick="openPrivacyModal()" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            <span class="badge-dot"></span>
+            <span>كيف نحمي بياناتك؟ 🛡️</span>
+        </div>
     </div>
 </header>
 
@@ -42,10 +48,12 @@
             </div>
 
             <p id="gatewayErrorMsg" class="error-text hidden" style="margin-top: 10px; color: var(--danger); font-size: 0.9rem;"></p>
-            
             <button id="btnVerifyKey" class="btn-primary" style="margin-top: 20px; width: 100%;" onclick="verifyApiKey()">بدء تنظيف البيانات 🚀</button>
 
-            <button class="btn-secondary" style="margin-top: 10px; width: 100%; border: 1px solid var(--accent); color: var(--text-light); background: transparent;" onclick="openPrivacyModal()">🛡️ هل بيانات شركتي في أمان؟</button>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="btn-secondary" style="flex: 1; border: 1px solid var(--accent-2); color: var(--text-light); background: transparent;" onclick="openFeaturesModal()">🚀 مميزات المشروع</button>
+                <button class="btn-secondary" style="flex: 1; border: 1px solid var(--accent); color: var(--text-light); background: transparent;" onclick="openPrivacyModal()">🛡️ هل بياناتي بأمان؟</button>
+            </div>
 
             <div class="help-box">
                 <p>ليس لديك مفتاح؟</p>
@@ -69,7 +77,10 @@
             <label class="btn-primary" for="fileInput">اختر ملف CSV / Excel</label>
             <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" hidden>
             
-            <p class="upload-note">🔒 بياناتك ومفتاحك لا يتم حفظها — <a href="#" onclick="openPrivacyModal(); return false;" style="color: var(--accent); text-decoration: underline;">اكتشف كيف نحمي بياناتك (انعدام التسريب)</a></p>
+            <p class="upload-note" style="margin-top: 20px;">
+                <a href="#" onclick="openFeaturesModal(); return false;" style="color: var(--accent-2); text-decoration: underline; margin-left: 15px;">🚀 اكتشف قدرات الذكاء الاصطناعي هنا</a>
+                <a href="#" onclick="openPrivacyModal(); return false;" style="color: var(--accent); text-decoration: underline;">🛡️ اكتشف كيف نحمي بياناتك (انعدام التسريب)</a>
+            </p>
         </div>
 
         <div class="upload-progress hidden" id="uploadProgress">
@@ -224,6 +235,69 @@
 
 <!-- Toast Notifications -->
 <div class="toast-container" id="toastContainer"></div>
+
+<!-- ========== CORE FEATURES MODAL ========== -->
+<div id="featuresModal" class="modal-overlay hidden">
+    <div class="modal-content privacy-modal">
+        <button class="modal-close" onclick="closeFeaturesModal()">×</button>
+        <div class="modal-header privacy-header">
+            <span class="modal-icon" style="color: var(--accent-2);">🚀</span>
+            <h2>المميزات الجوهرية (Core Features)</h2>
+            <p class="modal-subtitle">نظرة سريعة على الإمكانيات الخارقة التي يقدمها DataCleaner AI</p>
+        </div>
+        
+        <div class="modal-body privacy-body">
+            
+            <div class="privacy-section">
+                <h3>🗣️ 1. التنظيف باللغة الطبيعية (عربي وإنجليزي):</h3>
+                <p>الذكاء الاصطناعي مدرب على فهم الأوامر باللغتين. بفضل الـ Prompt Engineering (هندسة الأوامر) التي صممناها، يمكنه فهم حتى الصياغات المعقدة.</p>
+            </div>
+
+            <div class="privacy-section">
+                <h3>🩺 2. الفحص الذكي للبيانات (Smart Scan Profiling):</h3>
+                <p>بمجرد قيام المستخدم برفع الملف، يقوم السيرفر بمسحه في ثوانٍ لاستخراج "درجة صحة الملف" واكتشاف 8 مشاكل خفية:</p>
+                <ul style="color: var(--text-secondary); padding-right: 28px; font-size: 0.9rem; line-height: 1.8; margin-bottom: 14px;">
+                    <li><strong>الصفوف المكررة (Duplicates):</strong> يحسب عدد الصفوف المكررة تماماً.</li>
+                    <li><strong>القيم المفقودة (Missing Values):</strong> يحدد الأعمدة التي ينقصها بيانات ويصنف خطورتها.</li>
+                    <li><strong>تضارب صيغ التواريخ (Mixed Date Formats):</strong> يكتشف إذا كان نفس العمود يحتوي على (12/03/2023) و (2023-03-12).</li>
+                    <li><strong>الأرقام المشرقية (Arabic Numerals):</strong> يكتشف الأرقام المكتوبة بصيغة (١٢٣) ليقترح تحويلها لـ (123).</li>
+                    <li><strong>اختلاط اللغات (Mixed Languages):</strong> يكتشف الخانات التي تحتوي على كلمات عربية وإنجليزية معاً.</li>
+                    <li><strong>المسافات الزائدة (Whitespace Issues):</strong> يكتشف المسافات في أول أو آخر الكلمة، أو المسافات المزدوجة.</li>
+                    <li><strong>تضارب حالة الأحرف (Inconsistent Casing):</strong> يكتشف اختلافات الكابيتال والسمول (مثال: cairo و Cairo).</li>
+                    <li><strong>التشابه النصي (Fuzzy Duplicates):</strong> ميزة احترافية جداً تكتشف الكلمات المتشابهة بنسبة كبيرة (مثل: Microsoft و Micosoft) باستخدام خوارزمية (Levenshtein)، وتتجاهل أعمدة التواريخ حتى لا تعطي إنذارات خاطئة.</li>
+                    <li style="color: var(--success); margin-top: 8px;"><strong>الإصلاح الذكي (Auto-Fix):</strong> كل مشكلة تظهر معها نصيحة، وزر جانبي يملأ مربع المحادثة بالأمر المناسب لإصلاحها فوراً.</li>
+                </ul>
+            </div>
+
+            <div class="privacy-section">
+                <h3>🔑 3. حماية الميزانية (BYOK - Bring Your Own Key):</h3>
+                <p>نظام بوابة آمنة (Gateway) في بداية التطبيق. لا يمكن لأي مستخدم الدخول إلا بعد وضع مفتاح Gemini API الخاص به. النظام يتأكد من صلاحية المفتاح، ويرفض المفاتيح الخاطئة أو التي استنفدت الباقة المجانية برسائل خطأ عربية واضحة. هذا يضمن أن المشروع لن يكلفك (أنت المبرمج) أي أموال مهما زاد عدد المستخدمين.</p>
+            </div>
+
+            <div class="privacy-section">
+                <h3>🔁 4. المرونة المتعددة للنماذج (Multi-Model Fallback):</h3>
+                <p>لو واجه مفتاح المستخدم مشكلة مع الموديل الأحدث (gemini-2.0-flash)، فإن الكود مبرمج للانتقال بصمت وبسرعة لمحاولة العمل على موديلات أخرى مثل (flash-lite أو 2.5) لضمان عدم توقف الخدمة.</p>
+            </div>
+
+            <div class="privacy-section">
+                <h3>👀 5. المعاينة المباشرة (Before/After Live Preview):</h3>
+                <p>جدول بيانات تفاعلي (Data Grid) يتيح للمستخدم البحث والترتيب. وفيه خاصية (Tabs) تسمح للمستخدم بالتبديل بين رؤية شكل البيانات "قبل" التنظيف و "بعد" التنظيف للتأكد من نجاح العملية.</p>
+            </div>
+
+            <div class="privacy-section">
+                <h3>📥 6. نظام التصدير المتقدم الشامل (Export System):</h3>
+                <p>التطبيق لا يعطيك البيانات النظيفة فقط، بل يمنحك كل هذا:</p>
+                <ul style="color: var(--text-secondary); padding-right: 28px; font-size: 0.9rem; line-height: 1.8;">
+                    <li>ملف <strong>CSV / Excel</strong> النهائي النظيف.</li>
+                    <li>ملف كود <strong>Python (.py)</strong>: يحتوي مجمعاً على كل الأكواد التي استُخدمت، ليعيد المحلل استخدامها لاحقاً.</li>
+                    <li>تقرير تقييم <strong>(PDF Audit Report)</strong>: يوثق للمديرين كل خطوة تم إجراؤها على الملف.</li>
+                    <li>دفتر هندسي <strong>(Jupyter Notebook .ipynb)</strong>: يقسم العمليات كخلايا قابلة للتشغيل المستقل.</li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 <!-- ========== DATA PRIVACY MODAL ========== -->
 <div id="privacyModal" class="modal-overlay hidden">
