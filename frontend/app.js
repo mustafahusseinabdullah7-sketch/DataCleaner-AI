@@ -311,6 +311,10 @@ async function sendMessage() {
     const formData = new FormData();
     formData.append("session_id", sessionId);
     formData.append("user_request", userText);
+    
+    // Send user API key if provided
+    const apiKey = document.getElementById("apiKeyInput") ? document.getElementById("apiKeyInput").value.trim() : "";
+    formData.append("gemini_api_key", apiKey);
 
     try {
         const res = await fetch(`${API}/clean`, { method: "POST", body: formData });

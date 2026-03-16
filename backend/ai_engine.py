@@ -7,9 +7,6 @@ import json
 
 load_dotenv()
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-
-
 def build_prompt(df: pd.DataFrame, user_request: str) -> str:
     """Build a smart prompt that sends metadata, 3 rows, and categorical samples to Gemini."""
     columns = list(df.columns)
@@ -55,15 +52,25 @@ df = df.drop_duplicates()
     return prompt
 
 
-def get_cleaning_code(df: pd.DataFrame, user_request: str) -> dict:
+def get_cleaning_code(df: pd.DataFrame, user_request: str, api_key: str = None) -> dict:
     """Send metadata to Gemini and get back Python cleaning code."""
     prompt = build_prompt(df, user_request)
 
     import time
     max_retries = 3
+    
+    key_to_use = api_key if api_key and api_key.strip() else os.getenv("GEMINI_API_KEY")
+    if not key_to_use:
+        return {"success": False, "error": "مفتاح API غير موجود. الرجاء إدخال مفتاح Gemini الخاص بك.", "code": ""}
+        
+    try:
+        current_client = genai.Client(api_key=key_to_use)
+    except Exception as e:
+        return {"success": False, "error": f"مفتاح API غير صالح: {str(e)}", "code": ""}
+        
     for attempt in range(max_retries):
         try:
-            response = client.models.generate_content(
+            response = current_client.models.generate_content(
                 model="gemini-1.5-flash",
                 contents=prompt
             )

@@ -107,7 +107,8 @@ async def upload_file(file: UploadFile = File(...)):
 @app.post("/clean")
 async def clean_data(
     session_id: str = Form(...),
-    user_request: str = Form(...)
+    user_request: str = Form(...),
+    gemini_api_key: str = Form(None)
 ):
     """Process a natural language cleaning request."""
     try:
@@ -118,7 +119,7 @@ async def clean_data(
         df = session["df_current"]
 
         # Get cleaning code from Gemini (sends only metadata, NOT real data)
-        ai_result = get_cleaning_code(df, user_request)
+        ai_result = get_cleaning_code(df, user_request, gemini_api_key)
 
         if not ai_result["success"]:
             raise HTTPException(status_code=500, detail=f"AI Error: {ai_result.get('error', 'Unknown error')}")

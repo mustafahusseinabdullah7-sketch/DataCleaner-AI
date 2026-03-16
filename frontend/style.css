@@ -142,6 +142,44 @@ body::before {
     box-shadow: 0 8px 24px var(--accent-glow);
 }
 
+/* ====== API KEY INPUT ====== */
+.api-key-container {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+.api-key-input {
+    width: 100%;
+    max-width: 350px;
+    padding: 10px 14px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    text-align: center;
+    direction: ltr;
+    transition: all 0.3s ease;
+}
+.api-key-input:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+.api-help-link {
+    font-size: 0.75rem;
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.api-help-link:hover {
+    color: var(--accent-2);
+    text-decoration: underline;
+}
+
 /* ====== PROGRESS BAR ====== */
 .upload-progress { max-width: 600px; margin: 20px auto; text-align: center; }
 .progress-bar { background: var(--bg-card); border-radius: 8px; height: 8px; overflow: hidden; margin-bottom: 12px; }
