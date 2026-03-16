@@ -4,7 +4,7 @@ import uuid
 import json
 import traceback
 import pandas as pd
-from fastapi import FastAPI, File, UploadFile, HTTPException, Form
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
@@ -78,6 +78,10 @@ async def upload_file(file: UploadFile = File(...)):
         df = load_file(filepath)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error reading file: {str(e)}")
+    finally:
+        # 1. IMMEDIATE UPLOAD CLEANUP: Delete the physical file as soon as it's in RAM
+        if os.path.exists(filepath):
+            os.remove(filepath)
 
     scan_report = scan_dataframe(df)
 
@@ -238,8 +242,16 @@ async def undo_last_action(session_id: str = Form(...)):
 
 
 
+def delete_file_task(path: str):
+    """Background task to remove a physical file after the user downloads it."""
+    try:
+        if os.path.exists(path):
+            os.remove(path)
+    except Exception as e:
+        print(f"Failed to delete background file {path}: {e}")
+
 @app.get("/export/{session_id}/{export_type}")
-async def export_data(session_id: str, export_type: str):
+async def export_data(session_id: str, export_type: str, background_tasks: BackgroundTasks):
     """Export cleaned data as CSV, Excel, Python script, or PDF report."""
     if session_id not in sessions:
         raise HTTPException(status_code=404, detail="Session not found.")
@@ -251,10 +263,12 @@ async def export_data(session_id: str, export_type: str):
 
     if export_type == "csv":
         path = export_csv(df, f"{out_base}_cleaned.csv")
+        background_tasks.add_task(delete_file_task, path)
         return FileResponse(path, filename=f"{base_name}_cleaned.csv", media_type="text/csv")
 
     elif export_type == "excel":
         path = export_excel(df, f"{out_base}_cleaned.xlsx")
+        background_tasks.add_task(delete_file_task, path)
         return FileResponse(path, filename=f"{base_name}_cleaned.xlsx",
                             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
@@ -264,6 +278,7 @@ async def export_data(session_id: str, export_type: str):
             session["audit_log"],
             f"{out_base}_cleaning_script.py"
         )
+        background_tasks.add_task(delete_file_task, path)
         return FileResponse(path, filename=f"{base_name}_cleaning_script.py", media_type="text/plain")
 
     elif export_type == "pdf":
@@ -274,6 +289,7 @@ async def export_data(session_id: str, export_type: str):
             len(df),
             f"{out_base}_report.pdf"
         )
+        background_tasks.add_task(delete_file_task, path)
         return FileResponse(path, filename=f"{base_name}_report.pdf", media_type="application/pdf")
 
     elif export_type == "ipynb":
@@ -282,6 +298,7 @@ async def export_data(session_id: str, export_type: str):
             session["audit_log"],
             f"{out_base}_notebook.ipynb"
         )
+        background_tasks.add_task(delete_file_task, path)
         return FileResponse(path, filename=f"{base_name}_notebook.ipynb", media_type="application/x-ipynb+json")
 
     else:
