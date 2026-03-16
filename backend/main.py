@@ -104,6 +104,26 @@ async def upload_file(file: UploadFile = File(...)):
     }
 
 
+@app.post("/verify-key")
+async def verify_key(
+    gemini_api_key: str = Form(...)
+):
+    """Verify if the API key is valid and has available quota before letting user in."""
+    # We must import test_api_key at the top but since we might not have, 
+    # we'll use ai_engine.test_api_key or just call get_cleaning_code with a dummy prompt
+    try:
+        from backend.ai_engine import test_api_key
+    except ImportError:
+        from ai_engine import test_api_key
+        
+    result = test_api_key(gemini_api_key)
+    if result["valid"]:
+        return {"status": "success"}
+    else:
+        # Return 400 with the specific error from test_api_key
+        raise HTTPException(status_code=400, detail=result.get("error", "Invalid API Key"))
+
+
 @app.post("/clean")
 async def clean_data(
     session_id: str = Form(...),

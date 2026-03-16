@@ -26,8 +26,35 @@
 <!-- ========== MAIN ========== -->
 <main class="main-container">
 
+    <!-- STEP 0: API KEY GATEWAY (WELCOME SCREEN) -->
+    <section id="section-welcome" class="section active">
+        <div class="hero-text">
+            <h1>مرحباً بك في DataCleaner ⚡ AI</h1>
+            <p>قبل أن نبدأ، يرجى إدخال مفتاح Gemini API الخاص بك. جميع عمليات المعالجة تتم بأمان تام ولا نقوم برفع بياناتك لأي مكان.</p>
+        </div>
+
+        <div class="gateway-card">
+            <div class="gateway-icon">🔑</div>
+            <h2 class="gateway-title">أدخل مفتاحك للبدء</h2>
+            
+            <div class="api-key-container">
+                <input type="password" id="gatewayApiKeyInput" class="api-key-input" placeholder="أدخل المفتاح هنا (مثال: AIzaSy...)" autocomplete="off">
+            </div>
+
+            <p id="gatewayErrorMsg" class="error-text hidden" style="margin-top: 10px; color: var(--danger); font-size: 0.9rem;"></p>
+            
+            <button id="btnVerifyKey" class="btn-primary" style="margin-top: 20px; width: 100%;" onclick="verifyApiKey()">بدء تنظيف البيانات 🚀</button>
+
+            <div class="help-box">
+                <p>ليس لديك مفتاح؟</p>
+                <a href="https://aistudio.google.com/apikey" target="_blank" class="api-help-link">احصل على مفتاحك المجاني من جوجل من هنا</a>
+                <p class="small-text">اختر "Create API Key in new project" لتحصل على باقة مجانية تماماً.</p>
+            </div>
+        </div>
+    </section>
+
     <!-- STEP 1: UPLOAD -->
-    <section id="section-upload" class="section active">
+    <section id="section-upload" class="section hidden">
         <div class="hero-text">
             <h1>نظّف بياناتك بجملة واحدة 🧠</h1>
             <p>ارفع ملفك، واطلب ما تريد بلغتك الطبيعية — الذكاء الاصطناعي يكتب الكود ويُنفذه فوراً</p>
@@ -38,10 +65,6 @@
             <p class="upload-title">اسحب وأفلت ملفك هنا</p>
             <p class="upload-subtitle">أو</p>
             <label class="btn-primary" for="fileInput">اختر ملف CSV / Excel</label>
-            <div class="api-key-container">
-                <input type="password" id="apiKeyInput" class="api-key-input" placeholder="🔑 أدخل مفتاح Gemini API الخاص بك (اختياري لكن مفضل)" autocomplete="off">
-                <a href="https://aistudio.google.com/apikey" target="_blank" class="api-help-link">احصل على مفتاح مجاني هنا</a>
-            </div>
             
             <p class="upload-note">🔒 بياناتك ومفتاحك لا يتم حفظها — معالجة سحابية آمنة في الذاكرة</p>
         </div>

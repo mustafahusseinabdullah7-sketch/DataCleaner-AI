@@ -52,48 +52,104 @@ df = df.drop_duplicates()
     return prompt
 
 
+def test_api_key(api_key: str) -> dict:
+    """Verify if the provided API key is valid and has quota."""
+    if not api_key or not api_key.strip():
+        return {"valid": False, "error": "المفتاح فارغ"}
+        
+    try:
+        current_client = genai.Client(api_key=api_key)
+        # Try a very cheap request to verify quota
+        models_to_try = [
+            "models/gemini-2.0-flash-lite",
+            "models/gemini-2.0-flash",
+            "models/gemini-1.5-flash",
+        ]
+        
+        last_error = ""
+        for model in models_to_try:
+            try:
+                current_client.models.generate_content(
+                    model=model,
+                    contents="Reply with OK"
+                )
+                return {"valid": True, "error": None}
+            except Exception as e:
+                err = str(e)
+                last_error = err
+                if "429" in err:  # Quota problem, definitely bad for this model
+                    continue
+                if "404" in err or "NOT_FOUND" in err:
+                    continue
+                # If it's a 400 API_KEY_INVALID, return immediately
+                if "400" in err:
+                    return {"valid": False, "error": "مفتاح API غير صحيح أو ممسوخ. يرجى التأكد من نسخه بالكامل."}
+                    
+        return {"valid": False, "error": f"المفتاح سليم لكن باقتك المجانية (Quota) مستنفدة أو غير متاحة في منطقتك. يرجى إنشاء مفتاح جديد من aistudio.google.com"}
+        
+    except Exception as e:
+        return {"valid": False, "error": f"فشل الاتصال: {str(e)}"}
+
+
 def get_cleaning_code(df: pd.DataFrame, user_request: str, api_key: str = None) -> dict:
     """Send metadata to Gemini and get back Python cleaning code."""
     prompt = build_prompt(df, user_request)
 
     import time
-    max_retries = 3
-    
+
     key_to_use = api_key if api_key and api_key.strip() else os.getenv("GEMINI_API_KEY")
     if not key_to_use:
-        return {"success": False, "error": "مفتاح API غير موجود. الرجاء إدخال مفتاح Gemini الخاص بك.", "code": ""}
-        
+        return {"success": False, "error": "مفتاح API غير موجود. الرجاء إدخال مفتاح Gemini الخاص بك من aistudio.google.com/apikey", "code": ""}
+
     try:
         current_client = genai.Client(api_key=key_to_use)
     except Exception as e:
         return {"success": False, "error": f"مفتاح API غير صالح: {str(e)}", "code": ""}
-        
-    for attempt in range(max_retries):
+
+    # Try models in order of preference
+    models_to_try = [
+        "models/gemini-2.0-flash",
+        "models/gemini-2.0-flash-lite",
+        "models/gemini-2.5-flash",
+        "models/gemini-flash-latest",
+        "gemini-2.0-flash",
+        "gemini-1.5-flash",
+    ]
+
+    last_error = ""
+    for model in models_to_try:
         try:
             response = current_client.models.generate_content(
-                model="gemini-1.5-flash",
+                model=model,
                 contents=prompt
             )
             raw_text = response.text
-
-            # Extract code block
             code = _extract_code(raw_text)
-
             return {
                 "success": True,
                 "code": code,
-                "raw_response": raw_text
+                "raw_response": raw_text,
+                "model_used": model
             }
         except Exception as e:
             error_msg = str(e)
-            if "429" in error_msg and attempt < max_retries - 1:
-                time.sleep(15)  # Wait 15 seconds before retrying
+            last_error = error_msg
+            # If quota error, wait a bit and skip to next model
+            if "429" in error_msg:
+                time.sleep(2)
                 continue
-            return {
-                "success": False,
-                "error": error_msg,
-                "code": ""
-            }
+            # If model not found, skip silently
+            if "404" in error_msg or "NOT_FOUND" in error_msg:
+                continue
+            # Any other error, return immediately
+            return {"success": False, "error": error_msg, "code": ""}
+
+    # If all models failed
+    return {
+        "success": False,
+        "error": f"كل الموديلات المتاحة وصلت للحد الأقصى أو غير مدعومة. تأكد من أن مفتاح API الخاص بك قادم من: aistudio.google.com/apikey - الخطأ الأخير: {last_error[:200]}",
+        "code": ""
+    }
 
 
 

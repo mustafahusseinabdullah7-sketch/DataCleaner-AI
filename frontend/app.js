@@ -13,6 +13,7 @@ let currentTab = "before";
 let healthChartInstance = null;
 let currentSortCol = null;
 let currentSortAsc = true;
+let userApiKey = ""; // Store validated API key in memory
 
 // ============================================================
 // SECTION SWITCHING
@@ -25,6 +26,52 @@ function showSection(id) {
     const el = document.getElementById(id);
     el.classList.remove("hidden");
     el.classList.add("active");
+}
+
+// ============================================================
+// API KEY GATEWAY LOGIC
+// ============================================================
+async function verifyApiKey() {
+    const inputEl = document.getElementById("gatewayApiKeyInput");
+    const errorMsg = document.getElementById("gatewayErrorMsg");
+    const btn = document.getElementById("btnVerifyKey");
+    
+    const key = inputEl.value.trim();
+    if (!key) {
+        errorMsg.textContent = "يرجى إدخال مفتاح API أولاً.";
+        errorMsg.classList.remove("hidden");
+        return;
+    }
+    
+    // UI Loading state
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner"></span> جاري التحقق...`;
+    errorMsg.classList.add("hidden");
+    
+    try {
+        const formData = new FormData();
+        formData.append("gemini_api_key", key);
+        
+        const res = await fetch(`${API}/verify-key`, { method: "POST", body: formData });
+        const data = await res.json();
+        
+        if (res.ok && data.status === "success") {
+            // Success! Store key in memory and proceed to upload screen
+            userApiKey = key;
+            showSection("section-upload");
+        } else {
+            // Failed verification
+            errorMsg.textContent = data.detail || "مفتاح غير صالح. تأكد من نسخه بالكامل.";
+            errorMsg.classList.remove("hidden");
+        }
+    } catch (err) {
+        errorMsg.textContent = "عذراً، حدث خطأ أثناء الاتصال بالخادم.";
+        errorMsg.classList.remove("hidden");
+    } finally {
+        // Reset UI
+        btn.disabled = false;
+        btn.innerHTML = `بدء تنظيف البيانات 🚀`;
+    }
 }
 
 // ============================================================
@@ -312,9 +359,8 @@ async function sendMessage() {
     formData.append("session_id", sessionId);
     formData.append("user_request", userText);
     
-    // Send user API key if provided
-    const apiKey = document.getElementById("apiKeyInput") ? document.getElementById("apiKeyInput").value.trim() : "";
-    formData.append("gemini_api_key", apiKey);
+    // Send validated user API key
+    formData.append("gemini_api_key", userApiKey);
 
     try {
         const res = await fetch(`${API}/clean`, { method: "POST", body: formData });
