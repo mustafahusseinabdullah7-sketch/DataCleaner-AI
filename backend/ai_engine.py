@@ -64,7 +64,7 @@ def get_cleaning_code(df: pd.DataFrame, user_request: str) -> dict:
     for attempt in range(max_retries):
         try:
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-2.0-flash",
                 contents=prompt
             )
             raw_text = response.text
