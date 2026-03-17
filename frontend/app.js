@@ -564,14 +564,36 @@ window.addEventListener('click', (e) => {
 // ============================================================
 function openFeaturesModal() {
     const modal = document.getElementById('featuresModal');
-    if (modal) {
-        modal.classList.remove('hidden');
-    }
+    if (modal) modal.classList.remove('hidden');
 }
 
 function closeFeaturesModal() {
     const modal = document.getElementById('featuresModal');
-    if (modal) {
-        modal.classList.add('hidden');
-    }
+    if (modal) modal.classList.add('hidden');
 }
+
+// ============================================================
+// PRIVACY MODAL
+// ============================================================
+function openPrivacyModal() {
+    const modal = document.getElementById('privacyModal');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function closePrivacyModal() {
+    const modal = document.getElementById('privacyModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+// Close modals when clicking outside the content box
+document.addEventListener('click', function(e) {
+    const featuresModal = document.getElementById('featuresModal');
+    const privacyModal  = document.getElementById('privacyModal');
+
+    if (featuresModal && !featuresModal.classList.contains('hidden')) {
+        if (e.target === featuresModal) closeFeaturesModal();
+    }
+    if (privacyModal && !privacyModal.classList.contains('hidden')) {
+        if (e.target === privacyModal) closePrivacyModal();
+    }
+});
