@@ -391,6 +391,14 @@ local_env = {"df": df.copy(), "pd": pd, "np": np}
 # تنفيذ الكود محلياً في الرام! (الذكاء يخطط ونحن من ننفذ محلياً)
 exec(code, {}, local_env)</code></pre>
                         </div>
+                        <div class="code-proof" style="margin-top: 10px;">
+                            <div class="code-header"><span>دليل الحذف الكلي من (<code>main.py</code>)</span></div>
+                            <pre><code># يتم تنفيذ هذا الكود بمجرد دخول البيانات للـ RAM بطريقة آمنة
+finally:
+    # 1. IMMEDIATE UPLOAD CLEANUP: Delete the physical file
+    if os.path.exists(filepath):
+        os.remove(filepath)</code></pre>
+                        </div>
                     </details>
                 </div>
 
